@@ -1,0 +1,14 @@
+button {
+    background-color: #FFFFF0;
+    color: #333333;
+    padding: 10px 20px;
+    border: 1px solid #CCCCCC;
+    font-family: Arial, sans-serif;
+    cursor: pointer;
+    border-radius: 6px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  button:hover { /* Efeito hover */
+    background-color: #FFFFE0;
+  }
