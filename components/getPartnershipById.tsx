@@ -1,39 +1,59 @@
 // components/GetPartnershipById.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ethers } from 'ethers';
 import creatorPartnershipManagerAbi from './creatorPartnershipManagerAbi.json';
-import contractAddresses  from './contractAddresses.json'
-
-
-const contractAddress = contractAddresses.contracts.creatorPartnershipManager;
+import contractAddresses from './contractAddresses.json';
+import styles from './styles.module.css'; // Importando o arquivo CSS Module
 
 const GetPartnershipByIdComponent = () => {
   const [partnershipId, setPartnershipId] = useState(0);
   const [partnership, setPartnership] = useState(null);
+  const [status, setStatus] = useState('');
+  const contractAddress = contractAddresses.contracts.creatorPartnershipManager;
 
-  useEffect(() => {
-    const fetchPartnership = async () => {
-      if (window.ethereum && partnershipId >= 0) {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const contract = new ethers.Contract(contractAddress, creatorPartnershipManagerAbi, provider);
+  const fetchPartnership = async () => {
+    if (window.ethereum && partnershipId >= 0) {
+      setStatus('Fetching partnership data...');
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const contract = new ethers.Contract(contractAddress, creatorPartnershipManagerAbi, provider);
+      try {
         const partnershipData = await contract.getPartnershipById(partnershipId);
-        setPartnership(partnershipData);
+
+        // Convert BigNumber fields to strings
+        const formattedPartnership = {
+          ...partnershipData,
+          duration: partnershipData.duration.toString(),
+          startTime: partnershipData.startTime.toString(),
+        };
+
+        setPartnership(formattedPartnership);
+        setStatus('Partnership data fetched successfully.');
+      } catch (error) {
+        console.error('Error fetching partnership:', error);
+        setStatus('Error fetching partnership');
       }
-    };
-    fetchPartnership();
-  }, [partnershipId]);
+    } else {
+      setStatus('Please enter a valid partnership ID.');
+    }
+  };
 
   return (
-    <div>
+    <div className={styles.couponContainer}>
       <h2>Get Partnership By ID</h2>
-      <input 
-        type="number" 
-        value={partnershipId} 
-        onChange={(e) => setPartnershipId(Number(e.target.value))} 
-        placeholder="Partnership ID" 
-      />
+      <div className={styles.coupon}>
+      <label htmlFor="number">Partnership ID:</label>
+
+        <input 
+          type="number" 
+          value={partnershipId} 
+          onChange={(e) => setPartnershipId(Number(e.target.value))} 
+          placeholder="Partnership ID" 
+        />
+        <button onClick={fetchPartnership}>Fetch Partnership</button>
+      </div>
+      {status && <p>{status}</p>}
       {partnership && (
-        <div>
+        <div className={styles.coupon}>
           <p>Name: {partnership.name}</p>
           <p>Initiator Collection: {partnership.initiatorCollection}</p>
           <p>Partner Collections: {partnership.partnerCollections.join(', ')}</p>

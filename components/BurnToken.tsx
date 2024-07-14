@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { useAccount, useConnect } from 'wagmi';
 import { ethers } from 'ethers';
 import cp1Abi from './cp1Abi.json';
+import contractAddressess from './contractAddresses.json';
+import styles from './styles.module.css'; // Importando o CSS Module
 
 const BurnTokenComponent = () => {
   const { address, isConnected } = useAccount();
@@ -30,7 +32,7 @@ const BurnTokenComponent = () => {
       return;
     }
 
-    const contractAddress = '0xA963BbD9d9E71FfEF68e1E65556bBF4f30E200A9';
+    const contractAddress = contractAddressess.contracts.cp1;
     const contract = new ethers.Contract(contractAddress, cp1Abi, signer);
 
     try {
@@ -44,33 +46,45 @@ const BurnTokenComponent = () => {
   };
 
   return (
-    <div>
+    <div className={styles.couponContainer}>
       <h2>Queimar Token</h2>
       {!isConnected ? (
-        <button onClick={() => connect({ connector: connectors[0] })}>Conectar Carteira</button>
+        <button onClick={() => connect({ connector: connectors[0] })} className={styles.coupon}>Conectar Carteira</button>
       ) : (
-        <>
-          <input 
-            type="text" 
-            value={collectionName} 
-            onChange={(e) => setCollectionName(e.target.value)} 
-            placeholder="Nome da Coleção" 
-          />
-          <input 
-            type="number" 
-            value={tokenId} 
-            onChange={(e) => setTokenId(Number(e.target.value))} 
-            placeholder="ID do Token" 
-          />
-          <input 
-            type="number" 
-            value={amount} 
-            onChange={(e) => setAmount(Number(e.target.value))} 
-            placeholder="Quantidade" 
-          />
-          <button onClick={burnToken}>Queimar</button>
+        <div className={styles.coupon}>
+          <div>
+            <label htmlFor="collectionName">Coupon's name:</label>
+            <input 
+              id="collectionName"
+              type="text" 
+              value={collectionName} 
+              onChange={(e) => setCollectionName(e.target.value)} 
+              placeholder="Coupon's name" 
+            />
+          </div>
+          <div>
+            <label htmlFor="tokenId">Token ID :</label>
+            <input 
+              id="tokenId"
+              type="number" 
+              value={tokenId} 
+              onChange={(e) => setTokenId(Number(e.target.value))} 
+              placeholder="Token ID" 
+            />
+          </div>
+          <div>
+            <label htmlFor="amount">Amount:</label>
+            <input 
+              id="amount"
+              type="number" 
+              value={amount} 
+              onChange={(e) => setAmount(Number(e.target.value))} 
+              placeholder="Amount" 
+            />
+          </div>
+          <button onClick={burnToken}>Burn</button>
           <p>Status: {status}</p>
-        </>
+        </div>
       )}
     </div>
   );

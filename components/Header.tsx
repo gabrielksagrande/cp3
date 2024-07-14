@@ -51,7 +51,8 @@ export default function Header() {
                                         height="24"
                                         alt="Celo Logo"
                                     />
-                                </div>
+                                </div>                       
+
                                 <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
                                     <a
                                         href="#"

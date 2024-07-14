@@ -2,11 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import cp1Abi from './cp1Abi.json';
+import contractAddresses  from './contractAddresses.json'
 
 const ExecuteSellOrderComponent = ({ order }) => {
   const [status, setStatus] = useState('');
   const [isConnected, setIsConnected] = useState(false);
   const [signer, setSigner] = useState(null);
+  const contractAddress = contractAddresses.contracts.cp1;
 
   useEffect(() => {
     const checkWalletConnection = async () => {
@@ -28,7 +30,6 @@ const ExecuteSellOrderComponent = ({ order }) => {
       return;
     }
 
-    const contractAddress = '0xA963BbD9d9E71FfEF68e1E65556bBF4f30E200A9';
     const contract = new ethers.Contract(contractAddress, cp1Abi, signer);
 
     try {

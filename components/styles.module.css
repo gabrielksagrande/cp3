@@ -1,0 +1,81 @@
+/* styles.module.css */
+
+.couponContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.coupon {
+  border: 2px dashed #ff6f61;
+  background: #fff7f0;
+  padding: 20px;
+  margin: 10px;
+  width: 80%;
+  max-width: 400px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.coupon:before,
+.coupon:after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: #fff7f0;
+  border-radius: 50%;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+.coupon:before {
+  left: -10px;
+}
+
+.coupon:after {
+  right: -10px;
+}
+
+.coupon h2 {
+  margin-top: 0;
+  font-size: 1.2em;
+  color: #ff6f61;
+}
+
+.coupon p {
+  margin: 5px 0;
+  font-size: 1em;
+  color: #333;
+}
+
+.coupon button {
+  background-color: #ff6f61;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.coupon button:hover {
+  background-color: #e65b50;
+}
+
+.coupon button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.title {
+  font-size: 3em;
+  margin: 20px 0;
+  text-align: center;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}

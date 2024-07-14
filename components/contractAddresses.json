@@ -1,7 +1,7 @@
 {
     "contracts": {
-      "cp1": "0xA963BbD9d9E71FfEF68e1E65556bBF4f30E200A9",
-      "creatorPartnershipManager": "0x8a5494937873d429FAc337FAcf0A111DaEe37370",
+      "cp1": "0x80ff0DdB614f7A6CF5D4D062b3102B6cc11DAD07",
+      "creatorPartnershipManager": "0x766bBfcc20577A758056024b1774Fb5a3DD889Fa",
       "cUSD": "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1"
     }
   }

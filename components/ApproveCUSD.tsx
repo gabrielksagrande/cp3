@@ -1,18 +1,13 @@
-// components/ApprovePartnership.tsx
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import creatorPartnershipManagerAbi from './creatorPartnershipManagerAbi.json';
+import IERC20Abi from './cUSDAbi.json'; // ABI do contrato IERC20 para o token cUSD
 import contractAddresses from './contractAddresses.json';
 import styles from './styles.module.css'; // Importando o CSS Module
 
-const contractAddress = contractAddresses.contracts.creatorPartnershipManager;
-
-const ApprovePartnershipComponent = () => {
+const ApproveCUSDComponent = () => {
   const [isConnected, setIsConnected] = useState(false);
-  const [address, setAddress] = useState('');
   const [signer, setSigner] = useState<ethers.Signer | null>(null);
-
-  const [partnershipId, setPartnershipId] = useState(0);
+  const [amount, setAmount] = useState(0);
   const [status, setStatus] = useState('');
 
   useEffect(() => {
@@ -22,7 +17,6 @@ const ApprovePartnershipComponent = () => {
         const accounts = await provider.listAccounts();
         if (accounts.length > 0) {
           setIsConnected(true);
-          setAddress(accounts[0]);
           setSigner(provider.getSigner());
         }
       }
@@ -30,21 +24,22 @@ const ApprovePartnershipComponent = () => {
     checkWalletConnection();
   }, []);
 
-  const approvePartnership = async () => {
+  const approveCUSD = async () => {
     if (!signer) {
       setStatus('Please connect your wallet.');
       return;
     }
-
-    const contract = new ethers.Contract(contractAddress, creatorPartnershipManagerAbi, signer);
+    const spender = contractAddresses.contracts.cp1;
+    const cUSDAddress = contractAddresses.contracts.cUSD; // Endereço do contrato cUSD
+    const contract = new ethers.Contract(cUSDAddress, IERC20Abi, signer);
 
     try {
-      const tx = await contract.approvePartnership(partnershipId);
+      const tx = await contract.approve(spender, ethers.utils.parseUnits(amount.toString(), 18));
       await tx.wait();
-      setStatus(`Partnership approved successfully: ${tx.hash}`);
+      setStatus(`Approval successful: ${tx.hash}`);
     } catch (error) {
-      console.error('Error approving partnership:', error);
-      setStatus('Error approving partnership');
+      console.error('Error approving CUSD:', error);
+      setStatus('Error approving CUSD');
     }
   };
 
@@ -54,7 +49,6 @@ const ApprovePartnershipComponent = () => {
       await provider.send("eth_requestAccounts", []);
       const signer = provider.getSigner();
       const accounts = await provider.listAccounts();
-      setAddress(accounts[0]);
       setSigner(signer);
       setIsConnected(true);
     } else {
@@ -64,20 +58,22 @@ const ApprovePartnershipComponent = () => {
 
   return (
     <div className={styles.couponContainer}>
-      <h2>Approve Partnership</h2>
+      <h2>Approve CUSD</h2>
       {!isConnected ? (
         <button onClick={connectWallet} className={styles.coupon}>Connect Wallet</button>
       ) : (
         <div className={styles.coupon}>
-        <label htmlFor="number">Partnership ID:</label>
-
-          <input 
-            type="number" 
-            value={partnershipId} 
-            onChange={(e) => setPartnershipId(Number(e.target.value))} 
-            placeholder="Partnership ID" 
-          />
-          <button onClick={approvePartnership}>Approve</button>
+          <div>
+            <label htmlFor="amount">Amount:</label>
+            <input 
+              id="amount"
+              type="number" 
+              value={amount} 
+              onChange={(e) => setAmount(Number(e.target.value))} 
+              placeholder="Amount" 
+            />
+          </div>
+          <button onClick={approveCUSD}>Approve</button>
           <p>Status: {status}</p>
         </div>
       )}
@@ -85,4 +81,4 @@ const ApprovePartnershipComponent = () => {
   );
 };
 
-export default ApprovePartnershipComponent;
+export default ApproveCUSDComponent;

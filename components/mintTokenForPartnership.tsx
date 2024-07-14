@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import cp1Abi from './cp1Abi.json';
+import contractAddresses  from './contractAddresses.json';
+import styles from './styles.module.css'; // Importando o arquivo CSS Module
 
 const MintTokenForPartnershipComponent = () => {
   const [isConnected, setIsConnected] = useState(false);
@@ -32,7 +34,7 @@ const MintTokenForPartnershipComponent = () => {
       return;
     }
 
-    const contractAddress = '0xA963BbD9d9E71FfEF68e1E65556bBF4f30E200A9';
+    const contractAddress = contractAddresses.contracts.cp1;
     const contract = new ethers.Contract(contractAddress, cp1Abi, signer);
 
     try {
@@ -63,12 +65,12 @@ const MintTokenForPartnershipComponent = () => {
   };
 
   return (
-    <div>
-      <h2>Mint Tokens for Partnership</h2>
+    <div className={styles.couponContainer}>
+      <h2>Mint Coupon for Partnership</h2>
       {!isConnected ? (
-        <button onClick={connectWallet}>Connect Wallet</button>
+        <button onClick={connectWallet} className={styles.couponButton}>Connect Wallet</button>
       ) : (
-        <>
+        <div className={styles.coupon}>
           <div>
             <label htmlFor="to">To (Recipient Address):</label>
             <input 
@@ -80,13 +82,13 @@ const MintTokenForPartnershipComponent = () => {
             />
           </div>
           <div>
-            <label htmlFor="collectionName">Collection Name:</label>
+            <label htmlFor="collectionName">Coupon's Name:</label>
             <input 
               id="collectionName"
               type="text" 
               value={collectionName} 
               onChange={(e) => setCollectionName(e.target.value)} 
-              placeholder="Collection Name" 
+              placeholder="Coupon's Name" 
             />
           </div>
           <div>
@@ -109,9 +111,9 @@ const MintTokenForPartnershipComponent = () => {
               placeholder="Partnership ID" 
             />
           </div>
-          <button onClick={mintTokenForPartnership}>Mint</button>
+          <button onClick={mintTokenForPartnership} className={styles.couponButton}>Mint</button>
           <p>Status: {status}</p>
-        </>
+        </div>
       )}
     </div>
   );

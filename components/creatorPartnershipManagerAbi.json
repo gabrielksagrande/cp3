@@ -47,6 +47,12 @@
 				"internalType": "uint256",
 				"name": "timestamp",
 				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "spending",
+				"type": "uint256"
 			}
 		],
 		"name": "BenefitAuthorized",
@@ -164,6 +170,11 @@
 				"internalType": "address",
 				"name": "beneficiary",
 				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "spending",
+				"type": "uint256"
 			}
 		],
 		"name": "authorizeBenefit",
@@ -196,6 +207,11 @@
 			{
 				"internalType": "uint256",
 				"name": "duration",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "minSpending",
 				"type": "uint256"
 			}
 		],
@@ -321,6 +337,11 @@
 				"internalType": "address",
 				"name": "beneficiary",
 				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "spending",
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -331,7 +352,7 @@
 		"name": "collectionContract",
 		"outputs": [
 			{
-				"internalType": "contract ICollectionCreator",
+				"internalType": "contract ICollection",
 				"name": "",
 				"type": "address"
 			}
@@ -388,6 +409,11 @@
 						"internalType": "address",
 						"name": "beneficiary",
 						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "spending",
+						"type": "uint256"
 					}
 				],
 				"internalType": "struct CreatorPartnershipManager.BenefitAuthorization[]",
@@ -434,6 +460,11 @@
 						"internalType": "address",
 						"name": "beneficiary",
 						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "spending",
+						"type": "uint256"
 					}
 				],
 				"internalType": "struct CreatorPartnershipManager.BenefitAuthorization[]",
@@ -499,6 +530,11 @@
 					{
 						"internalType": "uint256",
 						"name": "startTime",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "minSpending",
 						"type": "uint256"
 					}
 				],
@@ -646,6 +682,11 @@
 			{
 				"internalType": "uint256",
 				"name": "startTime",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "minSpending",
 				"type": "uint256"
 			}
 		],

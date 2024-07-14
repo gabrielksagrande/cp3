@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import creatorPartnershipManagerAbi from './creatorPartnershipManagerAbi.json';
 import contractAddresses from './contractAddresses.json';
+import styles from './styles.module.css'; // Importando o arquivo CSS Module
 
 const ProposePartnershipComponent = () => {
   const [isConnected, setIsConnected] = useState(false);
@@ -12,6 +13,7 @@ const ProposePartnershipComponent = () => {
   const [partnerCollection, setPartnerCollection] = useState('');
   const [terms, setTerms] = useState('');
   const [duration, setDuration] = useState(0);
+  const [minSpending, setMinSpending] = useState(0); // Added minSpending state
   const [status, setStatus] = useState('');
 
   useEffect(() => {
@@ -43,7 +45,8 @@ const ProposePartnershipComponent = () => {
         initiatorCollection,
         partnerCollection,
         terms,
-        duration
+        duration,
+        minSpending // Added minSpending parameter
       );
       await tx.wait();
       setStatus(`Partnership proposed successfully: ${tx.hash}`);
@@ -66,65 +69,63 @@ const ProposePartnershipComponent = () => {
   };
 
   return (
-    <div>
+    <div className={styles.couponContainer}>
       <h2>Propose Partnership</h2>
       {!isConnected ? (
-        <button onClick={connectWallet}>Connect Wallet</button>
+        <button onClick={connectWallet} className={styles.couponButton}>Connect Wallet</button>
       ) : (
-        <>
-          <div>
-            <label htmlFor="name">Name:</label>
-            <input 
-              id="name"
-              type="text" 
-              value={name} 
-              onChange={(e) => setName(e.target.value)} 
-              placeholder="Name" 
-            />
-          </div>
-          <div>
-            <label htmlFor="initiatorCollection">Initiator Collection:</label>
-            <input 
-              id="initiatorCollection"
-              type="text" 
-              value={initiatorCollection} 
-              onChange={(e) => setInitiatorCollection(e.target.value)} 
-              placeholder="Initiator Collection" 
-            />
-          </div>
-          <div>
-            <label htmlFor="partnerCollection">Partner Collection:</label>
-            <input 
-              id="partnerCollection"
-              type="text" 
-              value={partnerCollection} 
-              onChange={(e) => setPartnerCollection(e.target.value)} 
-              placeholder="Partner Collection" 
-            />
-          </div>
-          <div>
-            <label htmlFor="terms">Terms:</label>
-            <input 
-              id="terms"
-              type="text" 
-              value={terms} 
-              onChange={(e) => setTerms(e.target.value)} 
-              placeholder="Terms" 
-            />
-          </div>
-          <div>
-            <label htmlFor="duration">Duration (seconds):</label>
-            <input 
-              id="duration"
-              type="number" 
-              value={duration} 
-              onChange={(e) => setDuration(Number(e.target.value))} 
-              placeholder="Duration (seconds)" 
-            />
-          </div>
-          <button onClick={proposePartnership}>Propose</button>
+        <div className={styles.coupon}>
+          <label htmlFor="name">Name:</label>
+          <input 
+            id="name"
+            type="text" 
+            value={name} 
+            onChange={(e) => setName(e.target.value)} 
+            placeholder="Name" 
+          />
+          <label htmlFor="initiatorCollection">Initiator Coupon's name:</label>
+          <input 
+            id="initiatorCollection"
+            type="text" 
+            value={initiatorCollection} 
+            onChange={(e) => setInitiatorCollection(e.target.value)} 
+            placeholder="Initiator Coupon's name" 
+          />
+          <label htmlFor="partnerCollection">Partner Coupon's name:</label>
+          <input 
+            id="partnerCollection"
+            type="text" 
+            value={partnerCollection} 
+            onChange={(e) => setPartnerCollection(e.target.value)} 
+            placeholder="Partner Coupon's name" 
+          />
+          <label htmlFor="terms">Terms:</label>
+          <input 
+            id="terms"
+            type="text" 
+            value={terms} 
+            onChange={(e) => setTerms(e.target.value)} 
+            placeholder="Terms" 
+          />
+          <label htmlFor="duration">Duration (seconds):</label>
+          <input 
+            id="duration"
+            type="number" 
+            value={duration} 
+            onChange={(e) => setDuration(Number(e.target.value))} 
+            placeholder="Duration (seconds)" 
+          />
+          <label htmlFor="minSpending">Minimum Spending:</label>
+          <input 
+            id="minSpending"
+            type="number" 
+            value={minSpending} 
+            onChange={(e) => setMinSpending(Number(e.target.value))} 
+            placeholder="Minimum Spending" 
+          />
+          <button onClick={proposePartnership} className={styles.couponButton}>Propose</button>
           <p>Status: {status}</p>
-        </>
+        </div>
       )}
     </div>
   );

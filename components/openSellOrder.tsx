@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import cp1Abi from './cp1Abi.json';
+import contractAddresses from './contractAddresses.json';
+import styles from './styles.module.css'; // Importando o arquivo CSS Module
 
 const OpenSellOrderComponent = () => {
   const [isConnected, setIsConnected] = useState(false);
@@ -33,7 +35,7 @@ const OpenSellOrderComponent = () => {
       return;
     }
 
-    const contractAddress = '0xA963BbD9d9E71FfEF68e1E65556bBF4f30E200A9';
+    const contractAddress = contractAddresses.contracts.cp1;
     const contract = new ethers.Contract(contractAddress, cp1Abi, signer);
 
     try {
@@ -64,39 +66,47 @@ const OpenSellOrderComponent = () => {
   };
 
   return (
-    <div>
+    <div className={styles.couponContainer}>
       <h2>Open Sell Order</h2>
       {!isConnected ? (
-        <button onClick={connectWallet}>Connect Wallet</button>
+        <button onClick={connectWallet} className={styles.couponButton}>Connect Wallet</button>
       ) : (
-        <>
+        <div className={styles.coupon}>
+          <label htmlFor="collectionName">Coupon's Name:</label>
           <input 
+            id="collectionName"
             type="text" 
             value={collectionName} 
             onChange={(e) => setCollectionName(e.target.value)} 
-            placeholder="Collection Name" 
+            placeholder="Coupon's Name" 
           />
+          <label htmlFor="tokenId">Token ID:</label>
           <input 
+            id="tokenId"
             type="number" 
             value={tokenId} 
             onChange={(e) => setTokenId(Number(e.target.value))} 
             placeholder="Token ID" 
           />
+          <label htmlFor="price">Price:</label>
           <input 
+            id="price"
             type="number" 
             value={price} 
             onChange={(e) => setPrice(Number(e.target.value))} 
             placeholder="Price" 
           />
+          <label htmlFor="amount">Amount:</label>
           <input 
+            id="amount"
             type="number" 
             value={amount} 
             onChange={(e) => setAmount(Number(e.target.value))} 
             placeholder="Amount" 
           />
-          <button onClick={openSellOrder}>Open Sell Order</button>
+          <button onClick={openSellOrder} className={styles.couponButton}>Open Sell Order</button>
           <p>Status: {status}</p>
-        </>
+        </div>
       )}
     </div>
   );
