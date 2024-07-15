@@ -1,0 +1,201 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+interface ICollection {
+    struct MintedTknInfo {
+        address to;
+        uint256 amount;
+        uint256 timestamp;
+    }
+
+    function getCollectionCreator(string memory collectionName) external view returns (address);
+     
+    function fetchMintedTokensForPartnershipByUser(uint256 partnershipId, address user) external view returns (MintedTknInfo[] memory);
+}
+
+contract CreatorPartnershipManager is Ownable {
+    struct Partnership {
+        string name; 
+        string initiatorCollection;
+        string[] partnerCollections;
+        address initiator;
+        address[] partners;
+        string terms;
+        uint256 duration;
+        bool approved;
+        uint256 startTime; 
+        uint256 minSpending; 
+    }
+
+    struct BenefitAuthorization {
+        uint256 partnershipId;
+        address authorizer;
+        uint256 timestamp;
+        address beneficiary;
+        uint256 spending; 
+    }
+
+    uint256 public nextPartnershipId;
+    mapping(uint256 => Partnership) public partnerships;
+    mapping(string => uint256) public partnershipNameToId;
+    mapping(uint256 => BenefitAuthorization[]) public benefitAuthorizations;
+    mapping(uint256 => mapping(address => uint256[])) public authorizationsByAuthorizer;
+    mapping(uint256 => mapping(address => uint256[])) public authorizationsByBeneficiary;
+
+    address public constant collectionContractAddress = 0x80ff0DdB614f7A6CF5D4D062b3102B6cc11DAD07;
+    ICollection public collectionContract;
+
+    event PartnershipProposed(uint256 indexed partnershipId, string name);
+    event PartnerAdded(uint256 indexed partnershipId, address partner);
+    event PartnershipApproved(uint256 indexed partnershipId);
+    event BenefitAuthorized(uint256 indexed partnershipId, address indexed authorizer, address indexed beneficiary, uint256 timestamp, uint256 spending);
+
+    constructor() Ownable(msg.sender) {
+        collectionContract = ICollection(collectionContractAddress);
+    }
+
+    function proposePartnership(
+        string memory name,
+        string memory initiatorCollection,
+        string memory partnerCollection,
+        string memory terms,
+        uint256 duration,
+        uint256 minSpending
+    ) external {
+        address initiator = collectionContract.getCollectionCreator(initiatorCollection);
+        require(initiator == msg.sender, "Caller is not the creator of the initiator collection");
+
+        address partner = collectionContract.getCollectionCreator(partnerCollection);
+        require(partner != address(0), "Invalid partner collection");
+
+        uint256 partnershipId = nextPartnershipId++;
+        Partnership storage partnership = partnerships[partnershipId];
+        partnership.name = name;
+        partnership.initiatorCollection = initiatorCollection;
+        partnership.partnerCollections.push(partnerCollection);
+        partnership.initiator = initiator;
+        partnership.partners.push(initiator); 
+        partnership.partners.push(partner);
+        partnership.terms = terms;
+        partnership.duration = duration;
+        partnership.approved = false;
+        partnership.startTime = block.timestamp;
+        partnership.minSpending = minSpending;
+
+        partnershipNameToId[name] = partnershipId;
+
+        emit PartnershipProposed(partnershipId, name);
+    }
+
+    function addPartner(uint256 partnershipId, string memory partnerCollection) public {
+        Partnership storage partnership = partnerships[partnershipId];
+        require(msg.sender == partnership.initiator, "Only the initiator can add partners");
+
+        address partner = collectionContract.getCollectionCreator(partnerCollection);
+        require(partner != address(0), "Invalid partner collection");
+        require(!isPartner(partnershipId, partner), "Partner already added");
+
+        partnership.partnerCollections.push(partnerCollection);
+        partnership.partners.push(partner);
+
+        emit PartnerAdded(partnershipId, partner);
+    }
+
+    function approvePartnership(uint256 partnershipId) external {
+        Partnership storage partnership = partnerships[partnershipId];
+        require(isPartner(partnershipId, msg.sender), "Only a partner can approve this partnership");
+        partnership.approved = true;
+
+        emit PartnershipApproved(partnershipId);
+    }
+
+    function authorizeBenefit(uint256 partnershipId, address beneficiary, uint256 spending) public {
+        require(isPartner(partnershipId, msg.sender), "Only a partner can authorize benefits");
+        
+        Partnership storage partnership = partnerships[partnershipId];
+        require(partnership.approved, "Partnership not approved");
+        require(spending > 0, "Spending must be greater than 0");
+        
+        BenefitAuthorization memory authorization = BenefitAuthorization({
+            partnershipId: partnershipId,
+            authorizer: msg.sender,
+            timestamp: block.timestamp,
+            beneficiary: beneficiary,
+            spending: spending
+        });
+        
+        uint256 authorizationId = benefitAuthorizations[partnershipId].length;
+        benefitAuthorizations[partnershipId].push(authorization);
+        authorizationsByAuthorizer[partnershipId][msg.sender].push(authorizationId);
+        authorizationsByBeneficiary[partnershipId][beneficiary].push(authorizationId);
+        
+        emit BenefitAuthorized(partnershipId, msg.sender, beneficiary, block.timestamp, spending);
+    }
+
+    function isPartner(uint256 partnershipId, address partner) public view returns (bool) {
+        Partnership memory partnership = partnerships[partnershipId];
+        for (uint i = 0; i < partnership.partners.length; i++) {
+            if (partnership.partners[i] == partner) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function getAuthorizationsByAuthorizer(uint256 partnershipId, address authorizer) public view returns (BenefitAuthorization[] memory) {
+        uint256[] memory ids = authorizationsByAuthorizer[partnershipId][authorizer];
+        BenefitAuthorization[] memory authorizations = new BenefitAuthorization[](ids.length);
+        for (uint i = 0; i < ids.length; i++) {
+            authorizations[i] = benefitAuthorizations[partnershipId][ids[i]];
+        }
+        return authorizations;
+    }
+
+    function getAuthorizationsByBeneficiary(uint256 partnershipId, address beneficiary) public view returns (BenefitAuthorization[] memory) {
+        uint256[] memory ids = authorizationsByBeneficiary[partnershipId][beneficiary];
+        BenefitAuthorization[] memory authorizations = new BenefitAuthorization[](ids.length);
+        for (uint i = 0; i < ids.length; i++) {
+            authorizations[i] = benefitAuthorizations[partnershipId][ids[i]];
+        }
+        return authorizations;
+    }
+
+    function isUserEligibleForPartnershipBenefits(address user, uint256 partnershipId) public view returns (bool) {
+        Partnership memory partnership = partnerships[partnershipId];
+        uint256 durationInSeconds = partnership.duration * 1 days;
+
+        BenefitAuthorization[] memory authorizations = getAuthorizationsByBeneficiary(partnershipId, user);
+        require(authorizations.length > 0, "No authorizations found for user");
+
+        uint256 lastAuthorizationTimestamp = 0;
+        uint256 totalSpending = 0;
+        for (uint i = 0; i < authorizations.length; i++) {
+            if (authorizations[i].timestamp > lastAuthorizationTimestamp) {
+                lastAuthorizationTimestamp = authorizations[i].timestamp;
+            }
+            totalSpending += authorizations[i].spending;
+        }
+
+        uint256 startTime = lastAuthorizationTimestamp > durationInSeconds ? lastAuthorizationTimestamp - durationInSeconds : 0;
+
+        ICollection.MintedTknInfo[] memory mintedTokens = collectionContract.fetchMintedTokensForPartnershipByUser(partnershipId, user);
+        uint256 mintedTokensCount = 0;
+        for (uint i = 0; i < mintedTokens.length; i++) {
+            if (mintedTokens[i].timestamp >= startTime) {
+                mintedTokensCount += mintedTokens[i].amount;
+            }
+        }
+
+        uint256 minSpending = partnership.minSpending;
+        require(minSpending > 0, "MinSpending must be greater than 0");
+        uint256 spendingRatio = totalSpending / minSpending;
+
+        return (mintedTokensCount < spendingRatio);
+    }
+
+    function getPartnershipById(uint256 partnershipId) public view returns (Partnership memory) {
+        return partnerships[partnershipId];
+    }
+}
